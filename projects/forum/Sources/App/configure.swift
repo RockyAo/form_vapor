@@ -18,19 +18,41 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
     services.register(middlewares)
 
+    let mysqlHost: String
+    let mysqlPort: Int
+    let mysqlDB: String
+    let mysqlUser: String
+    let mysqlPassword: String
+
+    if env == .development || env == .testing {
+        print("Under dev or testing mode")
+        mysqlHost = "mysql"
+        mysqlPort = 3306
+        mysqlDB = "vapor"
+        mysqlUser = "vapor"
+        mysqlPassword = "vapor"
+    } else {
+        print("Under production mode")
+        mysqlHost = Environment.get("MYSQL_HOST") ?? "mysql"
+        mysqlPort = 3306
+        mysqlDB = Environment.get("MYSQL_DB") ?? "vapor"
+        mysqlUser = Environment.get("MYSQL_USER") ?? "vapor"
+        mysqlPassword = Environment.get("MYSQL_PASS") ?? "vapor"
+    }
+
     var databases = DatabasesConfig()
 
     let mysqlConfig = MySQLDatabaseConfig(
-            hostname: "mysql",
-            port: 3306,
-            username: "vapor",
-            password: "vapor",
-            database: "vapor",
+            hostname: mysqlHost,
+            port: mysqlPort,
+            username: mysqlUser,
+            password: mysqlPassword,
+            database: mysqlDB,
             transport: .unverifiedTLS)
 
-    let mysqlDB = MySQLDatabase(config: mysqlConfig)
+    let mysqlDatabase = MySQLDatabase(config: mysqlConfig)
 
-    databases.add(database: mysqlDB, as: .mysql)
+    databases.add(database: mysqlDatabase, as: .mysql)
     services.register(databases)
 
     /// Configure migrations
