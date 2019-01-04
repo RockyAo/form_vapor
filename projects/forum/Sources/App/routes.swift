@@ -13,6 +13,13 @@ struct MessageContext: Codable, Content {
     var messages: [Message]
 }
 
+struct ReplyContext: Codable, Content {
+    var username: String?
+    var forum: Forum
+    var message: Message
+    var replies: [Message]
+}
+
 func getUsername() -> String?{
     return "rocky"
 }
@@ -57,6 +64,31 @@ public func routes(_ router: Router) throws {
                                     messages: $0)
                         }
                         .encode(status: .ok, for: req)
+            }
+        }
+
+        group.get("messages", Int.parameter) {
+            req -> Future<Response> in
+            let fid = try req.parameters.next(Int.self)
+            let mid = try req.parameters.next(Int.self)
+
+            return Forum.find(fid, on: req).flatMap(to: Response.self) {
+                forum in
+                guard let forum = forum else { throw Abort(.notFound) }
+
+                return Message.find(mid, on: req).flatMap(to: Response.self) {
+                    message in
+                    guard let message = message else { throw Abort(.notFound) }
+
+                    return Message.query(on: req)
+                            .filter(\.originID == message.id!)
+                            .all()
+                            .map {
+                                return ReplyContext(username: "rocky",
+                                        forum: forum, message: message, replies: $0)
+                            }
+                            .encode(status: .ok, for: req)
+                }
             }
         }
     }

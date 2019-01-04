@@ -12,19 +12,22 @@ struct MessageSeeder: Migration {
 
     static func prepare(on conn: MySQLConnection) -> Future<Void> {
         var messageId = 0
+
         return [1, 2, 3].flatMap {
                     forum in
-                    return [1, 2, 3].map {
+                    return [1, 2, 3, 4, 5].map {
                         message -> Message in
                         messageId += 1
-
+                        let title = "Title \(message) in Forum \(forum)"
+                        let content = "Body of Title \(message)"
+                        let originId = message > 3 ? (forum * 5 - 4) : 0
                         return Message(
                                 id: messageId,
                                 forumID: forum,
-                                title: "Title \(message) in Forum \(forum)",
-                                content: "Body \(message) in Forum \(forum)",
-                                originID: 0,
-                                author: "bx11",
+                                title: title,
+                                content: content,
+                                originID: originId,
+                                author: "Rocky",
                                 createdAt: Date())
                     }
                 }

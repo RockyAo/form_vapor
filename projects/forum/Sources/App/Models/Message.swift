@@ -14,7 +14,17 @@ struct Message: Content, MySQLModel {
     var content: String
     var originID: Int
     var author: String
-    var createdAt: Date
+    var createdAt: TimeInterval
+
+    init(id: Int?, forumID: Int, title: String, content: String, originID: Int, author: String, createdAt: Date) {
+        self.id = id
+        self.forumID = forumID
+        self.title = title
+        self.content = content
+        self.originID = originID
+        self.author = author
+        self.createdAt = createdAt.timeIntervalSince1970
+    }
 }
 
 extension Message: Migration {
