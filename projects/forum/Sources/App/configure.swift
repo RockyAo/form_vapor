@@ -60,8 +60,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     Forum.defaultDatabase = .mysql
 //    migrations.add(migration: CreateForumTable.self, database: .mysql)
     migrations.add(model: Forum.self, database: .mysql)
+    migrations.add(model: Message.self, database: .mysql)
     if env == .development {
         migrations.add(migration: ForumSeeder.self, database: .mysql)
+        migrations.add(migration: MessageSeeder.self, database: .mysql)
     }
 
     services.register(migrations)
